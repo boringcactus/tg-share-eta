@@ -4,7 +4,8 @@
   "private": true,
   "author": "Melody Horn (https://boringcactus.com)",
   "scripts": {
-    "start": "micro-bot -e"
+    "start": "micro-bot -d ${PROJECT_DOMAIN}.glitch.me",
+    "start-local": "micro-bot -e"
   },
   "license": "MIT",
   "dependencies": {
