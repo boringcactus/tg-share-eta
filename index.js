@@ -101,7 +101,7 @@ class State {
     async sendIfNeeded(ctx) {
         if (this.chatID === null && this.messageID === null) {
             const text = await this.text;
-            const message = await ctx.telegram.sendMessage(ctx.chat.id, text, {
+            const message = await ctx.reply(text, {
                 reply_markup: {
                     inline_keyboard: [[{
                         text: 'Share',
@@ -201,6 +201,11 @@ bot.on('callback_query', (ctx) => ctx.answerCbQuery());
 
 module.exports = {
     bot: bot,
+    options: {
+        telegram: {
+            webhookReply: false,
+        }
+    },
     server: (req, res) => {
         if (req.url === '/') {
             res.end(`
