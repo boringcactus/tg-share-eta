@@ -201,7 +201,18 @@ bot.on('callback_query', (ctx) => ctx.answerCbQuery());
 
 module.exports = {
     bot: bot,
-    server: (req, res, next) => {
-        console.log('Http request hook')
+    server: (req, res) => {
+        if (req.url === '/') {
+            res.end(`
+                <html lang="en">
+                <head>
+                <title>ETA Sharing Bot</title>
+                </head>
+                <body>
+                telegram bot that shares your ETA based on your live location. not publicly usable, but you can <a href="https://github.com/boringcactus/tg-share-eta#tg-share-eta">make your own</a>
+                </body>
+                </html>
+              `);
+        }
     }
 };
