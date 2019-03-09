@@ -101,7 +101,7 @@ class State {
     async sendIfNeeded(ctx) {
         if (this.chatID === null && this.messageID === null) {
             const text = await this.text;
-            const message = await ctx.reply(text, {
+            const message = await ctx.telegram.sendMessage(ctx.chat.id, text, {
                 reply_markup: {
                     inline_keyboard: [[{
                         text: 'Share',
