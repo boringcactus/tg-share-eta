@@ -1,0 +1,14 @@
+{
+  "name": "tg-share-eta",
+  "version": "1.0.0",
+  "private": true,
+  "author": "Melody Horn (https://boringcactus.com)",
+  "scripts": {
+    "start": "micro-bot -e"
+  },
+  "license": "MIT",
+  "dependencies": {
+    "@google/maps": "^0.5.5",
+    "micro-bot": "^2.5.3"
+  }
+}
