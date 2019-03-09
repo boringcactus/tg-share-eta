@@ -133,7 +133,7 @@ bot.use((ctx, next) => {
             ctx.state.obj = states[userID];
         } else {
             if (ctx.updateType === 'message') {
-                return ctx.reply('Your user id ' + userID + ' is not in the list of allowed users. Forward this to the bot admin.');
+                return ctx.replyWithMarkdown('Your user id ' + userID + ' is not in the list of allowed users. Forward this to the bot admin, or [make your own](https://github.com/boringcactus/tg-share-eta#tg-share-eta).');
             } else if (ctx.updateType === 'inline_query') {
                 // pass along the query
                 return next(ctx);
@@ -212,7 +212,7 @@ module.exports = {
                 telegram bot that shares your ETA based on your live location. not publicly usable, but you can <a href="https://github.com/boringcactus/tg-share-eta#tg-share-eta">make your own</a>
                 </body>
                 </html>
-              `);
+            `);
         }
     }
 };
