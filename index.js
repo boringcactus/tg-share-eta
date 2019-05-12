@@ -13,6 +13,19 @@ const UPDATE_INTERVAL_MINUTES = 1;
 
 const ALLOWED_USERS = process.env.ALLOWED_USERS.split(',').map(x => parseInt(x, 10));
 
+async function getArrivalInTimeZone(location, delay) {
+  let nowTimestamp = Math.floor(Date.now() / 1000);
+  let timestamp = Math.floor(Date.now() / 1000) + delay;
+  let response = await googleMapsClient.timezone({
+      location,
+      timestamp,
+  }).asPromise();
+  response = response.json;
+  let nowTime = nowTimestamp + response.rawOffset + response.dstOffset;
+  let finalTime = timestamp + response.rawOffset + response.dstOffset;
+  return {now: new Date(nowTime * 1000), then: new Date(finalTime * 1000)};
+}
+
 class State {
     constructor() {
         this.destination = null;
@@ -48,12 +61,14 @@ class State {
                 this.textInfo.older = this.textInfo.latest;
                 response = response.json;
                 if (response.status === 'OK') {
-                    let {value, text} = response.routes[0].legs[0].duration_in_traffic;
-                    let result = text;
+                    let {value, text: durationText} = response.routes[0].legs[0].duration_in_traffic;
+                    let {now, then} = await getArrivalInTimeZone(this.destination, value);
+                    let arrivalStr = then.toLocaleString('en-US', {hour: "numeric", minute: "2-digit"});
+                    let updateStr = now.toLocaleString('en-US', {hour: "numeric", minute: "2-digit"});
                     if (value < 5) {
-                        result = 'now';
+                        durationText = 'now';
                     }
-                    this.textInfo.latest = 'ETA ' + result;
+                    this.textInfo.latest = 'ETA ' + durationText + " (" + arrivalStr + ")\n\n_last updated " + updateStr + '_';
                 } else {
                     this.textInfo.latest = 'Error: ' + response.status;
                     if (response.error_message !== undefined && response.error_message.trim().length > 0) {
@@ -73,7 +88,7 @@ class State {
 
     static async editMessage(telegram, chatID, messageID, inlineMessageID, text) {
         try {
-            return await telegram.editMessageText(chatID, messageID, inlineMessageID, text);
+            return await telegram.editMessageText(chatID, messageID, inlineMessageID, text, {parse_mode: 'Markdown'});
         } catch (err) {
             if (err.description !== 'Bad Request: message is not modified') {
                 throw err;
@@ -108,6 +123,7 @@ class State {
                         switch_inline_query: '',
                     }]]
                 },
+                parse_mode: 'Markdown',
             });
             this.chatID = message.chat.id;
             this.messageID = message.message_id;
@@ -166,13 +182,15 @@ bot.on('edited_message', (ctx) => {
 bot.on('inline_query', async (ctx) => {
     if (ctx.state.obj && ctx.state.obj.ready) {
         const text = await ctx.state.obj.text;
+        const earlyText = text.split('_')[0];
         const result = [
             {
                 type: "article",
                 id: "a",
-                title: text,
+                title: earlyText,
                 input_message_content: {
-                    message_text: text
+                    message_text: text,
+                    parse_mode: 'Markdown',
                 },
                 reply_markup: {
                     inline_keyboard: [[{
